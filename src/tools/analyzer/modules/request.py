@@ -4,8 +4,6 @@ import click
 import logging
 
 from enum import Enum
-from source_files import Files
-from source_journald import Journald
 
 logger = logging.getLogger()
 
@@ -58,9 +56,10 @@ class RequestAnalyzer:
             Instantiated source object
         """
         if ctx.source == "journald":
-            import source_journald
+            from source_journald import Journald
             source = Journald()
         else:
+            from source_files import Files
             source = Files(ctx.logdir)
         return source
 
@@ -125,7 +124,7 @@ class RequestAnalyzer:
             self.consumed_logs.append(line.rstrip(line[-1]))
         else:
             # files source includes newline
-            if isinstance(source, Files):
+            if type(source).__name__ == 'Files':
                 print(line, end='')
             else:
                 print(line)
@@ -211,7 +210,7 @@ class RequestAnalyzer:
         self.done = ""
         # For each CID
         for line in self.matched_line(source, patterns):
-            if isinstance(source, Journald):
+            if type(source).__name__ == 'Journald':
                 print(line)
             else:
                 self.print_formatted(line, verbose)
